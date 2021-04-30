@@ -16,6 +16,20 @@ void print_array(std::array<double, N * N> &arr)
   }
 }
 
+void reset_array(std::array<double, N * N> &arr, std::array<int, N> &piv, std::array<double, N * N> &ret)
+{
+  for (int i = 0; i < N; i++)
+  {
+    int index_i = piv[i] - 1;
+    for (int j = 0; j < N; j++)
+    {
+      int index_j = piv[j] - 1;
+      ret[i * N + j] = arr[index_i * N + index_j];
+    }
+  }
+  return;
+}
+
 int main(int argc, char **argv)
 {
   std::array<double, N *N> A = {
@@ -23,22 +37,18 @@ int main(int argc, char **argv)
       0.0, 1.0, 0.0,
       0.0, 0.0, 1.0};
 
-  print_array(A);
-
   std::array<int, N> piv;
   int rank = 0;
   int info = 0;
   double tol = 1.0e-5;
   std::array<double, 2 * N> work;
-  LAPACKE_dpstrf(LAPACK_ROW_MAJOR,'U', N, A.data(), N, piv.data(), &rank, tol);
+  LAPACKE_dpstrf(LAPACK_ROW_MAJOR, 'U', N, A.data(), N, piv.data(), &rank, tol);
 
-  printf("%d\n", info);
   print_array(A);
 
-  for(int i =0; i < N; i++)
-  {
-    printf("%d\n", piv[i]);
-  }
+  std::array<double, N * N> ret;
+  reset_array(A, piv, ret);
+  print_array(ret);
 
   return 0;
 }
