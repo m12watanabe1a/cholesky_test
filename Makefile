@@ -18,7 +18,7 @@ EXEC = $(CXX_OBJ)
 all: $(EXEC)
 
 $(CXX_OBJ): $(CXX_SRC)
-	$(CXX) -o $@ $(CXXINCLUDE) $(CXXFLAGS) $(CXX_SRC) -lm
+	$(CXX) -o $@.out $(CXXINCLUDE) $(CXXFLAGS) $(CXX_SRC) -lm
 
 
 

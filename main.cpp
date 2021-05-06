@@ -3,7 +3,7 @@
 #include <array>
 #include <random>
 
-const int N = 2;
+const int N = 3;
 void print_array(std::array<double, N * N> &arr)
 {
   int index = 0;
@@ -34,8 +34,9 @@ void reset_array(std::array<double, N * N> &arr, std::array<int, N> &piv, std::a
 int main(int argc, char **argv)
 {
   std::array<double, N *N> A = {
-      1.0, 0.2, //
-      0.0, 1.0};
+      1.0, 0.2, 0.0, //
+      0.0, 1.0, 0.0, //
+      0.0, 0.0, 1.0};
 
   std::array<int, N> piv;
   int rank = 0;
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
   double tol = -1.0;
 
   std::array<double, 2 * N> work;
-  LAPACKE_dpstrf(LAPACK_ROW_MAJOR, 'U', N, A.data(), N, piv.data(), &rank, tol);
+  LAPACKE_dpstrf(LAPACK_ROW_MAJOR, 'L', N, A.data(), N, piv.data(), &rank, tol);
 
   print_array(A);
 
@@ -57,14 +58,10 @@ int main(int argc, char **argv)
   std::default_random_engine engine(seed_gen());
 
   std::normal_distribution<double> dist(0.0, 1.0);
-  for( int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++)
   {
     double v1 = dist(engine);
     double v2 = dist(engine);
-
-    
-
-
   }
 
   return 0;
