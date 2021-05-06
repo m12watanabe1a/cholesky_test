@@ -17,15 +17,31 @@ void print_array(std::array<double, N * N> &arr)
   }
 }
 
-void reset_array(std::array<double, N * N> &arr, std::array<int, N> &piv, std::array<double, N * N> &ret)
+void reset_array(const double *const arr, const int *const piv, const int &arr_size, double *const ret)
 {
-  for (int i = 0; i < N; i++)
+  for (int i = 0; i < arr_size; i++)
   {
     int index_i = piv[i] - 1;
-    for (int j = 0; j < N; j++)
+    for (int j = 0; j < arr_size; j++)
     {
+      if (i < j)
+        continue;
       int index_j = piv[j] - 1;
-      ret[i * N + j] = arr[index_i * N + index_j];
+      ret[i * arr_size + j] = arr[index_i * arr_size + index_j];
+    }
+  }
+  return;
+}
+
+void reset_array_test(const double *const arr, const int &arr_size, double *const ret)
+{
+  for (int i = 0; i < arr_size; i++)
+  {
+    for (int j = 0; j < arr_size; j++)
+    {
+      if (i < j)
+        continue;
+      ret[i * arr_size + j] = 1.0;
     }
   }
   return;
@@ -34,8 +50,8 @@ void reset_array(std::array<double, N * N> &arr, std::array<int, N> &piv, std::a
 int main(int argc, char **argv)
 {
   std::array<double, N *N> A = {
-      1.0, 0.2, 0.0, //
-      0.0, 1.0, 0.0, //
+      1.0, 0.0, 0.0, //
+      0.2, 1.0, 0.0, //
       0.0, 0.0, 1.0};
 
   std::array<int, N> piv;
@@ -43,26 +59,18 @@ int main(int argc, char **argv)
   int info = 0;
   double tol = -1.0;
 
-  std::array<double, 2 * N> work;
   LAPACKE_dpstrf(LAPACK_ROW_MAJOR, 'L', N, A.data(), N, piv.data(), &rank, tol);
 
   print_array(A);
 
   std::array<double, N * N> L;
-  reset_array(A, piv, L);
+  reset_array(A.data(), piv.data(), N, L.data());
+
   print_array(L);
 
-  int n = 1000;
-  std::array<double, N> mu = {3.0, 2.0};
-  std::random_device seed_gen;
-  std::default_random_engine engine(seed_gen());
-
-  std::normal_distribution<double> dist(0.0, 1.0);
-  for (int i = 0; i < n; i++)
-  {
-    double v1 = dist(engine);
-    double v2 = dist(engine);
-  }
-
+  std::array<double, N *N> test = {0.0};
+  std::array<double, N *N> ret = {0.0};
+  reset_array_test(test.data(), N, ret.data());
+  print_array(ret);
   return 0;
 }

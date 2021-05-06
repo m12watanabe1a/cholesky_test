@@ -20,6 +20,9 @@ all: $(EXEC)
 $(CXX_OBJ): $(CXX_SRC)
 	$(CXX) -o $@.out $(CXXINCLUDE) $(CXXFLAGS) $(CXX_SRC) -lm
 
+cholesky:
+	$(CXX) -o cholesky.out $(CXXINCLUDE) $(CXXFLAGS) cholesky.cpp -lm
+
 
 
 clean:
