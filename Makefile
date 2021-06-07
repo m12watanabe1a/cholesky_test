@@ -23,7 +23,8 @@ $(CXX_OBJ): $(CXX_SRC)
 cholesky:
 	$(CXX) -o cholesky.out $(CXXINCLUDE) $(CXXFLAGS) cholesky.cpp -lm
 
-
+inv_mat:
+	$(CXX) -o inv_mat.out $(CXXINCLUDE) $(CXXFLAGS) inv_mat.cpp -lm
 
 clean:
 	rm -f $(EXEC)
