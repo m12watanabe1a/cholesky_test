@@ -1,0 +1,135 @@
+#include <lapack.h>
+#include <lapacke.h>
+#include <cstdio>
+#include <array>
+#include <random>
+#include <iostream>
+
+#include <stdio.h>
+#include <cassert>
+#include <cstring>
+
+void print_array(const int m, const int n, double *arr)
+{
+  int index = 0;
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      printf(" %.3lf ", arr[i * m + j]);
+    }
+    printf("\n");
+  }
+}
+
+void GetInvMat(
+    double *const mat,
+    const uint32_t &mat_width,
+    const uint32_t &mat_height,
+    double *const ret)
+{
+  lapack_int m = mat_width;
+  printf("m: %d\n", m);
+  lapack_int n = mat_height;
+  printf("n: %d\n", n);
+
+  lapack_int lda = m;
+  lapack_int ldb = std::max(m, n);
+  lapack_int nrhs = ldb;
+
+  double *b = (double *)malloc(sizeof(double) * ldb * ldb);
+  double *s = (double *)malloc(sizeof(double) * std::min(m, n));
+  lapack_int rank = 0;
+  lapack_int info;
+  double rcond = -1.0;
+
+  for (int i = 0; i < ldb; ++i)
+  {
+    b[i * ldb + i] = 1.0;
+  }
+  info = LAPACKE_dgelss(LAPACK_ROW_MAJOR, m, n, nrhs, mat, lda, b, ldb, s, rcond, &rank);
+  for (int i = 0; i < ldb * ldb; ++i)
+  {
+    ret[i] = b[i];
+  }
+
+  free(b);
+  free(s);
+}
+
+int main(void)
+{
+  int mat_width = 3;
+  int mat_height = 3;
+  double ret[9];
+  double mat_orig[mat_width * mat_height] = {
+      1, 2, 3, //
+      4, 5, 6, //
+      7, 8, 9  //
+  };
+  double mat[mat_width * mat_height];
+  std::memcpy(mat, mat_orig, sizeof(double) * mat_width * mat_height);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", mat[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  GetInvMat(mat, mat_width, mat_height, ret);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", ret[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  std::memcpy(mat, mat_orig, sizeof(double) * mat_width * mat_height);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", mat[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  GetInvMat(mat, mat_width, mat_height, ret);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", ret[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  std::memcpy(mat, mat_orig, sizeof(double) * mat_width * mat_height);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", mat[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  GetInvMat(mat, mat_width, mat_height,ret);
+  for (int i = 0; i < mat_height; ++i)
+  {
+    for (int j = 0; j < mat_width; ++j)
+    {
+      printf("%.1lf ", ret[i * mat_width + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  return EXIT_SUCCESS;
+}

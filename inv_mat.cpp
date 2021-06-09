@@ -1,3 +1,4 @@
+#include <lapack.h>
 #include <lapacke.h>
 #include <cstdio>
 #include <array>
@@ -19,107 +20,52 @@ void print_array(const int m, const int n, double *arr)
     }
     printf("\n");
   }
-}
-
-inline void GetInvMat(
-    double *const mat,
-    const uint32_t &mat_width,
-    const uint32_t &mat_height)
-{
-  const int m = mat_width;
-  printf("m: %d\n", m);
-  const int n = mat_height;
-  printf("n: %d\n", n);
-
-  const int lda = m;
-  const int ldb = std::max(m, n);
-  const int nrhs = ldb;
-
-  double *b = (double *)malloc(sizeof(double) * ldb * ldb);
-  double *s = (double *)malloc(sizeof(double) * std::min(m, n));
-  lapack_int rank = 0;
-  lapack_int info;
-  double rcond = -1.0;
-
-  for (int i = 0; i < ldb; ++i)
-  {
-    b[i * ldb + i] = 1.0;
-  }
-  double tmp[0];
-  info = LAPACKE_dgelss_work(LAPACK_ROW_MAJOR, n, m, nrhs, mat, lda, b, ldb, s, rcond, &rank, tmp, -1);
-  assert(info == 0);
-  int lwork = tmp[0];
-  double *work = (double *)malloc(sizeof(double) * lwork);
-  info = LAPACKE_dgelss_work(LAPACK_ROW_MAJOR, n, m, nrhs, mat, lda, b, ldb, s, rcond, &rank, work, lwork);
-
-  if (mat_width > mat_height)
-  {
-    for (uint32_t i = 0; i < mat_width; ++i)
-    {
-      std::memcpy(&mat[i * mat_height], &b[i * ldb], sizeof(double) * mat_height);
-    }
-  }
-  else
-  {
-    std::memcpy(&mat[0], &b[0], sizeof(double) * mat_width * mat_height);
-  }
-
-  free(b);
-  free(s);
-  free(work);
+  printf("\n");
 }
 
 int main(void)
 {
-  int mat_width = 4;
-  int mat_height = 3;
-  double mat_orig[mat_width * mat_height] = {
-      1, 2, 3, 4,   //
-      5, 6, 7, 8,   //
-      9, 10, 11, 12 //
+  lapack_int m = 3;
+  lapack_int n = 3;
+
+  double a_orig[m * n] = {
+      1, 2, 3, //
+      4, 5, 6, //
+      7, 8, 9, //
   };
-  double mat[mat_width * mat_height];
-  std::memcpy(mat, mat_orig, sizeof(double)*mat_width*mat_height);
-  for(int i = 0; i < mat_height; ++i)
+
+  lapack_int lda = m;
+  lapack_int ldb = std::max(m, n);
+  lapack_int nrhs = ldb;
+  double *a = (double *)malloc(size_t(sizeof(double) * m * n));
+  double *b = (double *)malloc(size_t(sizeof(double) * ldb * ldb));
+  double *s = (double *)malloc(size_t(sizeof(double) * std::min(m, n)));
+  lapack_int rank = 0;
+  lapack_int info;
+  double rcond = -1.0;
+
+  std::memcpy(a, a_orig, size_t(sizeof(double) * m * n));
+  for (int i = 0; i < ldb; ++i)
   {
-    for(int j = 0; j < mat_width; ++j)
-    {
-      printf("%.1lf ", mat[i*mat_width + j]);
-    }
-    printf("\n");
+    b[i * ldb + i] = 1.0;
   }
 
-  GetInvMat(mat, mat_width, mat_height);
-  for (int i = 0; i < mat_width; ++i)
-  {
-    for (int j = 0; j < mat_height; ++j)
-    {
-      int idx = i * mat_height + j;
-      std::cout << mat[idx] << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  print_array(m, n, a);
+  info = LAPACKE_dgelss(LAPACK_ROW_MAJOR, m, n, nrhs, a, lda, b, ldb, s, rcond, &rank);
+  assert(info == 0);
+  print_array(m, n, a);
 
-  std::memcpy(mat, mat_orig, sizeof(double)*mat_width*mat_height);
-  for(int i = 0; i < mat_height; ++i)
+  std::memcpy(a, a_orig, size_t(sizeof(double) * m * n));
+  print_array(m, n, a);
+  for (int i = 0; i < ldb; ++i)
   {
-    for(int j = 0; j < mat_width; ++j)
-    {
-      printf("%.1lf ", mat[i*mat_width + j]);
-    }
-    printf("\n");
+    b[i * ldb + i] = 1.0;
   }
-  GetInvMat(mat, mat_width, mat_height);
-  for (int i = 0; i < mat_width; ++i)
-  {
-    for (int j = 0; j < mat_height; ++j)
-    {
-      int idx = i * mat_height + j;
-      std::cout << mat[idx] << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
+  info = LAPACKE_dgelss(LAPACK_ROW_MAJOR, m, n, nrhs, a, lda, b, ldb, s, rcond, &rank);
+  assert(info == 0);
+  print_array(m, n, a);
+  free(a);
+  free(b);
+  free(s);
   return EXIT_SUCCESS;
 }
